@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kapp
+  namespace: default
+  labels: 
+    app: kapp
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: kapp
+  template: 
+    metadata:
+      labels:
+        app: kapp
+
+    spec: 
+      containers:
+      - name: kapp
+        image: bruno74t/kapp:1.0
+        ports:
+        - containerPort: 4000
+        env: 
+          - name: MONGO_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-secret
+                key: password
+
+---
+
+apiVersion: v1
+kind: Service
+metadata: 
+  name: kapp-service
+spec:
+  selector:
+    app: kapp
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 6000
+    targetPort: 4000
+    nodePort: 32100

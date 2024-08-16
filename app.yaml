@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: default
+  labels: 
+    app: app
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: app
+  template: 
+    metadata:
+      labels:
+        app: app
+
+    spec: 
+      containers:
+      - name: app
+        image: bruno74t/app:1.0
+
+        ports:
+        - containerPort: 3000
+        env: 
+          - name: MONGO_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-secret
+                key: password
+
+---
+
+apiVersion: v1
+kind: Service
+metadata: 
+  name: app-service
+spec:
+  selector:
+    app: app
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 5000
+    targetPort: 3000
+    nodePort: 32000
