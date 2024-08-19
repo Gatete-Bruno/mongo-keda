@@ -1,0 +1,29 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: mongodb-job
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: kapp
+  cooldownPeriod:  30
+
+  triggers:
+  - type: mongodb
+    metadata:
+      dbName: "example_app"
+      collection: "bulk_data"
+      query: '{ "status": "validating" }'
+      queryValue: "1"
+    authenticationRef: 
+      name: mongodb-trigger
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata: 
+  name: mongodb-trigger
+spec: 
+  secretTargetRef:
+    - parameter: connectionString
+      name: mongodb-secret
+      key: connect
